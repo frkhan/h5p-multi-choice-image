@@ -48,12 +48,12 @@ var H5P = H5P || {};
  * @param {Options} options
  * @param {number} contentId
  * @param {Object} contentData
- * @returns {H5P.MultiChoice}
+ * @returns {H5P.MultiChoiceImage}
  * @constructor
  */
-H5P.MultiChoice = function (options, contentId, contentData) {
-  if (!(this instanceof H5P.MultiChoice))
-    return new H5P.MultiChoice(options, contentId, contentData);
+H5P.MultiChoiceImage = function (options, contentId, contentData) {
+  if (!(this instanceof H5P.MultiChoiceImage))
+    return new H5P.MultiChoiceImage(options, contentId, contentData);
   var self = this;
   this.contentId = contentId;
   this.contentData = contentData;
@@ -66,15 +66,17 @@ H5P.MultiChoice = function (options, contentId, contentData) {
     '  <% for (var i=0; i < answers.length; i++) { %>' +
     '    <li class="h5p-answer" role="<%= answers[i].role %>" tabindex="<%= answers[i].tabindex %>" aria-checked="<%= answers[i].checked %>" data-id="<%= i %>">' +
     '      <div class="h5p-alternative-container">' +
-    '        <span class="h5p-alternative-inner"><%= answers[i].text %></span><span class="h5p-hidden-read">.</span>' +
+    '        <span class="h5p-alternative-inner"><img src="<%= answers[i].fileUrl %>"></span><span class="h5p-hidden-read">.</span>' +
     '      </div>' +
     '      <div class="h5p-clearfix"></div>' +
+    '      <div class="text"><%= answers[i].text %></div>' +
     '    </li>' +
     '  <% } %>' +
     '</ul>';
 
   var defaults = {
     image: null,
+    file: null,
     question: "No question text provided",
     answers: [
       {
@@ -84,6 +86,7 @@ H5P.MultiChoice = function (options, contentId, contentData) {
           notChosenFeedback: ''
         },
         text: "Answer 1",
+        file: null,
         correct: true
       }
     ],
@@ -132,6 +135,8 @@ H5P.MultiChoice = function (options, contentId, contentData) {
       // Update number of correct choices
       numCorrect++;
     }
+
+    params.answers[i].fileUrl = H5P.getPath(options.answers[i].file.path, contentId);
   }
 
   // Determine if no choices is the correct
@@ -226,7 +231,8 @@ H5P.MultiChoice = function (options, contentId, contentData) {
     }
 
     // Register Introduction
-    self.setIntroduction('<div id="' + params.label + '">' + params.question + '</div>');
+    var questionImageUrl = H5P.getPath(options.file.path, contentId);
+    self.setIntroduction('<div class="h5p-question-file"><img src="' + questionImageUrl + '"></div>' + '<div id="' + params.label + '">' + params.question + '</div>');
 
     // Register task content area
     $myDom = $(template.render(params));
@@ -684,7 +690,8 @@ H5P.MultiChoice = function (options, contentId, contentData) {
        // Those two loops cannot be merged or you'll screw up your tips
        for (i = 0; i < answersDisplayed.length; i++) {
          // move tips and answers on display
-         $(answersDisplayed[i]).find('.h5p-alternative-inner').html(params.answers[i].text);
+         $(answersDisplayed[i]).find('.h5p-alternative-inner').html('<img src="' + params.answers[i].fileUrl + '">');
+         $(answersDisplayed[i]).find('.text').html(params.answers[i].text);
          $(tip[i]).detach().appendTo($(answersDisplayed[idMap.indexOf(oldIdMap[i])]).find('.h5p-alternative-container'));
        }
      }
@@ -881,7 +888,9 @@ H5P.MultiChoice = function (options, contentId, contentData) {
    * Get xAPI data.
    * Contract used by report rendering engine.
    *
-   * @see contract at {@link https://h5p.org/documentation/developers/contracts#guides-header-6}
+   * @see contract at
+   *   {@link
+   *   https://h5p.org/documentation/developers/contracts#guides-header-6}
    */
   this.getXAPIData = function(){
     var xAPIEvent = this.createXAPIEventTemplate('answered');
@@ -910,7 +919,7 @@ H5P.MultiChoice = function (options, contentId, contentData) {
         'id': params.answers[i].originalOrder + '',
         'description': {
           // Remove tags, must wrap in div tag because jQuery 1.9 will crash if the string isn't wrapped in a tag.
-          'en-US': $('<div>' + params.answers[i].text + '</div>').text()
+          'en-US': $('<div><img src="' + params.answers[i].fileUrl + '"><div class="text">' + params.answers[i].text + '</div></div>').html()
         }
       };
       if (params.answers[i].correct) {
@@ -1052,9 +1061,9 @@ H5P.MultiChoice = function (options, contentId, contentData) {
     }
   }
 
-  H5P.MultiChoice.counter = (H5P.MultiChoice.counter === undefined ? 0 : H5P.MultiChoice.counter + 1);
+  H5P.MultiChoiceImage.counter = (H5P.MultiChoiceImage.counter === undefined ? 0 : H5P.MultiChoiceImage.counter + 1);
   params.role = (params.behaviour.singleAnswer ? 'radiogroup' : 'group');
-  params.label = 'h5p-mcq' + H5P.MultiChoice.counter;
+  params.label = 'h5p-mcq' + H5P.MultiChoiceImage.counter;
 
   /**
    * Pack the current state of the interactivity into a object that can be
@@ -1081,7 +1090,8 @@ H5P.MultiChoice = function (options, contentId, contentData) {
   /**
    * Check if user has given an answer.
    *
-   * @param {boolean} [ignoreCheck] Ignore returning true from pressing "check-answer" button.
+   * @param {boolean} [ignoreCheck] Ignore returning true from pressing
+   *   "check-answer" button.
    * @return {boolean} True if answer is given
    */
   this.getAnswerGiven = function (ignoreCheck) {
@@ -1098,5 +1108,5 @@ H5P.MultiChoice = function (options, contentId, contentData) {
   };
 };
 
-H5P.MultiChoice.prototype = Object.create(H5P.Question.prototype);
-H5P.MultiChoice.prototype.constructor = H5P.MultiChoice;
+H5P.MultiChoiceImage.prototype = Object.create(H5P.Question.prototype);
+H5P.MultiChoiceImage.prototype.constructor = H5P.MultiChoiceImage;

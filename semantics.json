@@ -20,12 +20,20 @@
     ]
   },
   {
+    "name": "file",
+    "type": "image",
+    "label": "Question image",
+    "importance": "high",
+    "disableCopyright": true
+  },
+  {
     "name": "question",
     "type": "text",
-    "importance": "medium",
+    "importance": "low",
     "widget": "html",
     "label": "Question",
     "enterMode": "p",
+    "optional": true,
     "tags": [
       "strong",
       "em",
@@ -50,11 +58,19 @@
       "importance": "high",
       "fields": [
         {
+          "name": "file",
+          "type": "image",
+          "label": "Image",
+          "importance": "high",
+          "disableCopyright": true
+        },
+        {
           "name": "text",
           "type": "text",
-          "importance": "medium",
+          "importance": "low",
           "widget": "html",
           "label": "Text",
+          "optional": true,
           "tags": [
             "strong",
             "em",
